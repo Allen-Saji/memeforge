@@ -226,7 +226,7 @@ async function generateWithOpenAI(
       size: "1024x1024",
     });
 
-    if (response.data[0]?.url) {
+    if (response.data?.[0]?.url) {
       const imgRes = await fetch(response.data[0].url);
       const buffer = Buffer.from(await imgRes.arrayBuffer());
       const imgPath = path.join(imagesDir, `${imageId}-logo.png`);

@@ -1,26 +1,209 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════
+   MemeForge Design System — Narrative Arbitrage Engine
+   Dark terminal aesthetic with BNB Chain accent
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette */
+  --bg-void: #06080d;
+  --bg-base: #0a0e17;
+  --bg-surface: #0f1520;
+  --bg-elevated: #151c2b;
+  --bg-card: #121924;
+  --bg-card-hover: #1a2236;
+
+  /* BNB Chain accent — the gold standard */
+  --accent: #f0b90b;
+  --accent-dim: #f0b90b66;
+  --accent-glow: #f0b90b33;
+  --accent-muted: #f0b90b1a;
+
+  /* Status colors */
+  --green: #22c55e;
+  --green-dim: #22c55e66;
+  --green-glow: #22c55e33;
+  --red: #ef4444;
+  --red-dim: #ef444466;
+  --red-glow: #ef444433;
+  --blue: #3b82f6;
+  --blue-dim: #3b82f666;
+  --orange: #f97316;
+  --orange-dim: #f9731666;
+  --purple: #a855f7;
+
+  /* Text hierarchy */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+
+  /* Borders */
+  --border: #1e293b;
+  --border-hover: #334155;
+  --border-accent: #f0b90b33;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-elevated: 0 4px 6px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-glow-accent: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-muted);
+  --shadow-glow-green: 0 0 20px var(--green-glow);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-exo2);
+  --font-display: var(--font-orbitron);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ═══ Base Styles ═══ */
+
+html {
+  background: var(--bg-void);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══ Custom Scrollbar ═══ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+/* ═══ Keyframes ═══ */
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes scan-line {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes border-pulse {
+  0%, 100% { border-color: var(--accent-dim); }
+  50% { border-color: var(--accent); }
+}
+
+/* ═══ Utility Classes ═══ */
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--border) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.animate-border-pulse {
+  animation: border-pulse 2s ease-in-out infinite;
+}
+
+/* Gap score bar gradient */
+.score-bar {
+  background: linear-gradient(90deg,
+    var(--red) 0%,
+    var(--orange) 40%,
+    var(--accent) 65%,
+    var(--green) 100%
+  );
+}
+
+/* Card glow on hover */
+.card-glow:hover {
+  box-shadow: 0 0 0 1px var(--accent-dim), var(--shadow-glow-accent);
+}
+
+/* Scan line overlay effect */
+.scan-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  animation: scan-line 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Selection color */
+::selection {
+  background: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

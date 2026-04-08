@@ -1,65 +1,132 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
+import { Header } from "@/components/header";
+import { StatsBar } from "@/components/stats-bar";
+import { GapFeed } from "@/components/gap-feed";
+import { PackageDetail } from "@/components/package-detail";
+import { ReconnectBanner } from "@/components/reconnect-banner";
+import { usePipeline } from "@/hooks/use-pipeline";
+
+export default function DashboardPage() {
+  const {
+    gaps,
+    packages,
+    connected,
+    reconnecting,
+    lastScanAt,
+    selectedGapId,
+    selectGap,
+    selectedGap,
+    selectedPackage,
+  } = usePipeline();
+
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+
+  const handleSelectGap = (id: string) => {
+    selectGap(id);
+    // On mobile, open the detail sheet
+    setMobileDetailOpen(true);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="relative flex flex-col h-screen overflow-hidden bg-[var(--bg-base)]">
+      {/* Grid background texture */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: `
+            linear-gradient(var(--text-dim) 1px, transparent 1px),
+            linear-gradient(90deg, var(--text-dim) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Reconnection banner */}
+      <ReconnectBanner show={reconnecting} />
+
+      {/* Header */}
+      <Header connected={connected} reconnecting={reconnecting} />
+
+      {/* Stats bar */}
+      <StatsBar gaps={gaps} packages={packages} lastScanAt={lastScanAt} />
+
+      {/* Main content: gap feed + detail panel */}
+      <div className="flex flex-1 min-h-0 relative z-[1]">
+        {/* Gap Feed (left ~60%) */}
+        <div className="w-full md:w-[55%] lg:w-[58%] md:border-r border-[var(--border)] flex flex-col min-h-0">
+          <GapFeed
+            gaps={gaps}
+            packages={packages}
+            selectedGapId={selectedGapId}
+            onSelectGap={handleSelectGap}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Package Detail — Desktop (right ~40%) */}
+        <div className="hidden md:flex md:w-[45%] lg:w-[42%] flex-col min-h-0 overflow-hidden">
+          <div className="flex items-center px-5 py-3 border-b border-[var(--border)]">
+            <h2
+              className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
+              Launch Package
+            </h2>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <PackageDetail gap={selectedGap} pkg={selectedPackage} />
+          </div>
+        </div>
+      </div>
+
+      {/* Package Detail — Mobile slide-up sheet */}
+      <AnimatePresence>
+        {mobileDetailOpen && selectedGap && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 z-40 md:hidden"
+              onClick={() => setMobileDetailOpen(false)}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 top-16 z-50 md:hidden bg-[var(--bg-base)] rounded-t-2xl border-t border-[var(--border)] flex flex-col overflow-hidden"
+            >
+              <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
+                <h2
+                  className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]"
+                  style={{ fontFamily: "var(--font-orbitron)" }}
+                >
+                  Launch Package
+                </h2>
+                <button
+                  onClick={() => setMobileDetailOpen(false)}
+                  className="p-1.5 rounded-md hover:bg-[var(--bg-elevated)] transition-colors cursor-pointer"
+                  aria-label="Close detail panel"
+                >
+                  <X className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <PackageDetail gap={selectedGap} pkg={selectedPackage} />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Ambient scan line effect */}
+      <div className="fixed inset-0 pointer-events-none scan-overlay opacity-[0.15]" />
     </div>
   );
 }
