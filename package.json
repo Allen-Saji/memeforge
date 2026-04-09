@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "archiver": "^7.0.1",
     "better-sqlite3": "^12.8.0",
     "eventsource-parser": "^3.0.6",
     "framer-motion": "^12.38.0",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/archiver": "^7.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.19.39",
     "@types/react": "^19",

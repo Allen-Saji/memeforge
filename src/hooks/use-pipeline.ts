@@ -16,7 +16,8 @@ interface PipelineState {
   selectedPackage: LaunchPackage | null;
 }
 
-const USE_MOCK = true; // Toggle for development
+// Auto-detect: use mock data unless SSE endpoint is reachable
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
 export function usePipeline(): PipelineState {
   const [gaps, setGaps] = useState<NarrativeGap[]>([]);

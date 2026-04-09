@@ -272,15 +272,17 @@ export function PackageDetail({ gap, pkg }: PackageDetailProps) {
             <ExternalLink className="w-3.5 h-3.5" />
             Four.meme
           </a>
-          <button
-            disabled
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
-              bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-dim)]
-              opacity-50 cursor-not-allowed"
+          <a
+            href={`/api/packages/${pkg.id}/export`}
+            download
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer
+              bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-secondary)]
+              hover:bg-[var(--bg-elevated)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]
+              transition-all duration-200"
           >
             <Download className="w-3.5 h-3.5" />
             Export ZIP
-          </button>
+          </a>
         </div>
 
         {/* Content sections */}
@@ -289,19 +291,39 @@ export function PackageDetail({ gap, pkg }: PackageDetailProps) {
           <section>
             <SectionHeader icon={ImageIcon} title="Generated Assets" />
             <div className="grid grid-cols-2 gap-2 mt-2">
-              {pkg.imageUrls.map((url, i) => (
-                <div
-                  key={i}
-                  className="aspect-square rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] overflow-hidden flex items-center justify-center"
-                >
-                  <div className="text-center p-3">
-                    <ImageIcon className="w-8 h-8 text-[var(--text-dim)] mx-auto mb-2" />
-                    <p className="text-[10px] text-[var(--text-muted)]">
-                      {i === 0 ? "Logo" : "Meme"} Asset
-                    </p>
+              {pkg.imageUrls.length > 0 ? (
+                pkg.imageUrls.map((url, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] overflow-hidden flex items-center justify-center"
+                  >
+                    {url.startsWith("/") ? (
+                      <img
+                        src={`/api${url}`}
+                        alt={i === 0 ? "Token Logo" : "Meme Asset"}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                        }}
+                      />
+                    ) : null}
+                    <div className={url.startsWith("/") ? "hidden text-center p-3" : "text-center p-3"}>
+                      <ImageIcon className="w-8 h-8 text-[var(--text-dim)] mx-auto mb-2" />
+                      <p className="text-[10px] text-[var(--text-muted)]">
+                        {i === 0 ? "Logo" : "Meme"} Asset
+                      </p>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-2 py-6 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] flex flex-col items-center justify-center">
+                  <ImageIcon className="w-8 h-8 text-[var(--text-dim)] mb-2" />
+                  <p className="text-[10px] text-[var(--text-muted)]">
+                    No images generated
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </section>
 
