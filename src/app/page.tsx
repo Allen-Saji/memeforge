@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Header } from "@/components/header";
@@ -9,6 +9,7 @@ import { GapFeed } from "@/components/gap-feed";
 import { PackageDetail } from "@/components/package-detail";
 import { ReconnectBanner } from "@/components/reconnect-banner";
 import { usePipeline } from "@/hooks/use-pipeline";
+import type { LaunchPackage } from "@/types";
 
 export default function DashboardPage() {
   const {
@@ -21,7 +22,15 @@ export default function DashboardPage() {
     selectGap,
     selectedGap,
     selectedPackage,
+    addPackage,
   } = usePipeline();
+
+  const handlePackageGenerated = useCallback(
+    (pkg: LaunchPackage) => {
+      addPackage(pkg);
+    },
+    [addPackage]
+  );
 
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
@@ -77,7 +86,7 @@ export default function DashboardPage() {
             </h2>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <PackageDetail gap={selectedGap} pkg={selectedPackage} />
+            <PackageDetail gap={selectedGap} pkg={selectedPackage} onPackageGenerated={handlePackageGenerated} />
           </div>
         </div>
       </div>
@@ -118,7 +127,7 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <PackageDetail gap={selectedGap} pkg={selectedPackage} />
+                <PackageDetail gap={selectedGap} pkg={selectedPackage} onPackageGenerated={handlePackageGenerated} />
               </div>
             </motion.div>
           </>

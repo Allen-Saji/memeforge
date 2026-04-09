@@ -60,6 +60,14 @@ export interface LaunchPackage {
   textReadyMs: number; // time to generate text package
 }
 
+export interface ConceptOption {
+  tokenName: string;
+  ticker: string;
+  tagline: string;
+  imageDirection: string;
+  vibe: string;
+}
+
 export interface PipelineEvent {
   type: "gap_detected" | "package_generating" | "package_complete" | "scan_cycle";
   data: NarrativeGap | LaunchPackage | { timestamp: string };

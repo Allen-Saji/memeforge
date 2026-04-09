@@ -14,6 +14,7 @@ interface PipelineState {
   selectGap: (id: string | null) => void;
   selectedGap: NarrativeGap | null;
   selectedPackage: LaunchPackage | null;
+  addPackage: (pkg: LaunchPackage) => void;
 }
 
 // Auto-detect: use mock data unless SSE endpoint is reachable
@@ -37,9 +38,8 @@ export function usePipeline(): PipelineState {
     const connectTimer = setTimeout(() => {
       setConnected(true);
       setGaps(mockGaps);
-      setPackages(mockPackages);
+      setPackages([]);
       setLastScanAt(new Date().toISOString());
-      setSelectedGapId("gap-1");
     }, 800);
 
     return () => clearTimeout(connectTimer);
@@ -145,6 +145,20 @@ export function usePipeline(): PipelineState {
     setSelectedGapId(id);
   }, []);
 
+  const addPackage = useCallback((pkg: LaunchPackage) => {
+    setPackages((prev) => {
+      const exists = prev.find((p) => p.id === pkg.id);
+      if (exists) return prev.map((p) => (p.id === pkg.id ? pkg : p));
+      return [pkg, ...prev];
+    });
+    // Update gap status to complete
+    setGaps((prev) =>
+      prev.map((g) =>
+        g.id === pkg.gapId ? { ...g, status: "complete" as const } : g
+      )
+    );
+  }, []);
+
   const selectedGap = gaps.find((g) => g.id === selectedGapId) ?? null;
   const selectedPackage =
     packages.find((p) => p.gapId === selectedGapId) ?? null;
@@ -159,5 +173,6 @@ export function usePipeline(): PipelineState {
     selectGap,
     selectedGap,
     selectedPackage,
+    addPackage,
   };
 }

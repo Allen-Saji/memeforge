@@ -154,7 +154,7 @@ export const mockGaps: NarrativeGap[] = [
     score: 0.92,
     matchScore: 0.08,
     detectedAt: new Date(Date.now() - 3 * 60000).toISOString(),
-    status: "complete",
+    status: "pending",
   },
   {
     id: "gap-2",
@@ -162,7 +162,7 @@ export const mockGaps: NarrativeGap[] = [
     score: 0.88,
     matchScore: 0.12,
     detectedAt: new Date(Date.now() - 1 * 60000).toISOString(),
-    status: "generating",
+    status: "pending",
   },
   {
     id: "gap-3",
@@ -170,7 +170,7 @@ export const mockGaps: NarrativeGap[] = [
     score: 0.74,
     matchScore: 0.15,
     detectedAt: new Date(Date.now() - 15 * 60000).toISOString(),
-    status: "complete",
+    status: "pending",
   },
   {
     id: "gap-4",
