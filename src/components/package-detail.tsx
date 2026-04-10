@@ -12,9 +12,6 @@ import {
   ChevronDown,
   ChevronUp,
   MessageSquare,
-  Heart,
-  Repeat2,
-  Eye,
   Crosshair,
   Loader2,
   ListChecks,
@@ -25,6 +22,7 @@ import {
 } from "lucide-react";
 import { useRelativeTime, useElapsedTimer } from "@/hooks/use-relative-time";
 import type { NarrativeGap, LaunchPackage, ConceptOption } from "@/types";
+import { LaunchButton } from "@/components/launch-config";
 
 interface PackageDetailProps {
   gap: NarrativeGap | null;
@@ -197,7 +195,7 @@ function ConceptPicker({
 
         {/* Stats */}
         <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]" style={{ fontFamily: "var(--font-geist-mono)" }}>
-          <span>{gap.narrative.tweetCount} tweets</span>
+          <span>{gap.narrative.signalCount} signals ({gap.narrative.sources.join(", ")})</span>
           <span>{Math.round(gap.narrative.avgEngagement)} avg engagement</span>
           {gap.closestToken && (
             <span className="text-[var(--red)]">
@@ -206,14 +204,14 @@ function ConceptPicker({
           )}
         </div>
 
-        {/* Top tweet preview */}
-        {gap.narrative.topTweet && (
+        {/* Top signal preview */}
+        {gap.narrative.topSignal && (
           <div className="mt-3 p-3 rounded-lg bg-[var(--bg-base)] border border-[var(--border)]">
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">
-              &ldquo;{gap.narrative.topTweet.text}&rdquo;
+              &ldquo;{gap.narrative.topSignal.title}&rdquo;
             </p>
             <p className="text-[10px] text-[var(--text-dim)] mt-1">
-              @{gap.narrative.topTweet.author.userName} · {gap.narrative.topTweet.likeCount} likes
+              {gap.narrative.topSignal.source} · {gap.narrative.topSignal.engagement.toLocaleString()} engagement
             </p>
           </div>
         )}
@@ -347,32 +345,38 @@ function ConceptPicker({
           </>
         )}
 
-        {/* Source tweets (collapsible) */}
-        {gap.narrative.tweets.length > 0 && (
-          <SourceTweets tweets={gap.narrative.tweets} />
+        {/* Source signals (collapsible) */}
+        {gap.narrative.signals.length > 0 && (
+          <SourceSignals signals={gap.narrative.signals} />
         )}
       </div>
     </div>
   );
 }
 
-// ── Source Tweets (collapsible) ──────────────────────────
-function SourceTweets({
-  tweets,
+// ── Source Signals (collapsible) ──────────────────────────
+function SourceSignals({
+  signals,
 }: {
-  tweets: Array<{
+  signals: Array<{
     id: string;
-    text: string;
-    author: { userName: string; name: string; isVerified: boolean };
-    likeCount: number;
-    retweetCount: number;
-    replyCount: number;
-    viewCount: number;
+    source: string;
+    title: string;
+    url?: string;
+    engagement: number;
   }>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const formatNum = (n: number) =>
     n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
+  const sourceLabel: Record<string, string> = {
+    reddit: "Reddit",
+    google_trends: "Google Trends",
+    dexscreener: "Dexscreener",
+    coingecko: "CoinGecko",
+    twitter: "Twitter/X",
+  };
 
   return (
     <section className="pt-2">
@@ -382,7 +386,7 @@ function SourceTweets({
       >
         <MessageSquare className="w-4 h-4 text-[var(--text-muted)]" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
-          Source Tweets ({tweets.length})
+          Source Signals ({signals.length})
         </span>
         {expanded ? (
           <ChevronUp className="w-3.5 h-3.5 text-[var(--text-dim)] ml-auto" />
@@ -400,37 +404,32 @@ function SourceTweets({
             className="overflow-hidden"
           >
             <div className="mt-2 space-y-2">
-              {tweets.map((tweet) => (
-                <div key={tweet.id} className="p-3 rounded-lg bg-[var(--bg-base)] border border-[var(--border)]">
+              {signals.map((signal) => (
+                <div key={signal.id} className="p-3 rounded-lg bg-[var(--bg-base)] border border-[var(--border)]">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)]" />
-                    <span className="text-xs font-semibold text-[var(--text-primary)]">
-                      {tweet.author.name}
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--accent)]">
+                      {sourceLabel[signal.source] || signal.source}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      @{tweet.author.userName}
+                    <span
+                      className="text-[10px] text-[var(--text-dim)] ml-auto"
+                      style={{ fontFamily: "var(--font-geist-mono)" }}
+                    >
+                      {formatNum(signal.engagement)} engagement
                     </span>
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-2">
-                    {tweet.text}
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                    {signal.title}
                   </p>
-                  <div
-                    className="flex items-center gap-4 text-[10px] text-[var(--text-dim)]"
-                    style={{ fontFamily: "var(--font-geist-mono)" }}
-                  >
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3" /> {formatNum(tweet.likeCount)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Repeat2 className="w-3 h-3" /> {formatNum(tweet.retweetCount)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <MessageSquare className="w-3 h-3" /> {formatNum(tweet.replyCount)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" /> {formatNum(tweet.viewCount)}
-                    </span>
-                  </div>
+                  {signal.url && (
+                    <a
+                      href={signal.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-[var(--accent)] hover:underline mt-1 inline-block"
+                    >
+                      View source
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
@@ -497,18 +496,7 @@ function CompletedPackage({ gap, pkg }: { gap: NarrativeGap; pkg: LaunchPackage 
             text={pkg.talkingPoints.map((tp, i) => `${i + 1}. ${tp}`).join("\n")}
             label="Talking Points"
           />
-          <a
-            href="https://four.meme"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer
-              bg-[var(--accent-muted)] border border-[var(--accent-dim)] text-[var(--accent)]
-              hover:bg-[var(--accent)] hover:text-[var(--bg-base)]
-              transition-all duration-200"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Four.meme
-          </a>
+          <LaunchButton pkg={pkg} />
           <a
             href={`/api/packages/${pkg.id}/export`}
             download
@@ -595,9 +583,9 @@ function CompletedPackage({ gap, pkg }: { gap: NarrativeGap; pkg: LaunchPackage 
             </p>
           </section>
 
-          {/* Source Tweets */}
-          {gap.narrative.tweets.length > 0 && (
-            <SourceTweets tweets={gap.narrative.tweets} />
+          {/* Source Signals */}
+          {gap.narrative.signals.length > 0 && (
+            <SourceSignals signals={gap.narrative.signals} />
           )}
         </div>
       </motion.div>

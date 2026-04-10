@@ -27,8 +27,8 @@ export async function POST(request: Request) {
   const db = getDb();
   const row = db
     .prepare(
-      `SELECT g.*, n.id as narrative_id, n.theme, n.keywords, n.tweet_count,
-              n.avg_engagement, n.top_tweet, n.detected_at as narrative_detected_at,
+      `SELECT g.*, n.id as narrative_id, n.theme, n.keywords, n.sources, n.signal_count,
+              n.avg_engagement, n.top_signal, n.detected_at as narrative_detected_at,
               t.address as token_address, t.name as token_name, t.ticker as token_ticker,
               t.market_cap, t.holder_count, t.bonding_curve_progress
        FROM gaps g
@@ -65,10 +65,11 @@ export async function POST(request: Request) {
       id: row.narrative_id as string,
       theme: row.theme as string,
       keywords: JSON.parse(row.keywords as string),
-      tweets: [],
-      tweetCount: row.tweet_count as number,
+      signals: [],
+      signalCount: row.signal_count as number,
+      sources: JSON.parse((row.sources as string) || "[]"),
       avgEngagement: row.avg_engagement as number,
-      topTweet: JSON.parse(row.top_tweet as string),
+      topSignal: JSON.parse(row.top_signal as string),
       detectedAt: row.narrative_detected_at as string,
     } as NarrativeCluster,
     closestToken: row.token_address

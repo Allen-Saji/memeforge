@@ -31,9 +31,10 @@ function initSchema() {
       id TEXT PRIMARY KEY,
       theme TEXT NOT NULL,
       keywords TEXT NOT NULL, -- JSON array
-      tweet_count INTEGER NOT NULL,
+      sources TEXT NOT NULL, -- JSON array of SignalSource
+      signal_count INTEGER NOT NULL,
       avg_engagement REAL NOT NULL,
-      top_tweet TEXT NOT NULL, -- JSON
+      top_signal TEXT NOT NULL, -- JSON
       detected_at TEXT NOT NULL
     );
 
@@ -127,15 +128,16 @@ function pruneOldPackages(keepCount: number) {
 export function insertGap(gap: NarrativeGap) {
   const d = getDb();
   d.prepare(
-    `INSERT OR REPLACE INTO narratives (id, theme, keywords, tweet_count, avg_engagement, top_tweet, detected_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT OR REPLACE INTO narratives (id, theme, keywords, sources, signal_count, avg_engagement, top_signal, detected_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     gap.narrative.id,
     gap.narrative.theme,
     JSON.stringify(gap.narrative.keywords),
-    gap.narrative.tweetCount,
+    JSON.stringify(gap.narrative.sources),
+    gap.narrative.signalCount,
     gap.narrative.avgEngagement,
-    JSON.stringify(gap.narrative.topTweet),
+    JSON.stringify(gap.narrative.topSignal),
     gap.narrative.detectedAt
   );
 
@@ -186,7 +188,7 @@ export function getRecentGaps(limit = 20): NarrativeGap[] {
   const d = getDb();
   const rows = d
     .prepare(
-      `SELECT g.*, n.theme, n.keywords, n.tweet_count, n.avg_engagement, n.top_tweet, n.detected_at as narrative_detected_at,
+      `SELECT g.*, n.theme, n.keywords, n.sources, n.signal_count, n.avg_engagement, n.top_signal, n.detected_at as narrative_detected_at,
               t.address as token_address, t.name as token_name, t.ticker as token_ticker, t.market_cap, t.holder_count, t.bonding_curve_progress
        FROM gaps g
        JOIN narratives n ON g.narrative_id = n.id
@@ -244,10 +246,11 @@ function mapRowToGap(row: Record<string, unknown>): NarrativeGap {
       id: row.narrative_id as string,
       theme: row.theme as string,
       keywords: JSON.parse(row.keywords as string),
-      tweets: [],
-      tweetCount: row.tweet_count as number,
+      signals: [],
+      signalCount: row.signal_count as number,
+      sources: JSON.parse((row.sources as string) || "[]"),
       avgEngagement: row.avg_engagement as number,
-      topTweet: JSON.parse(row.top_tweet as string),
+      topSignal: JSON.parse(row.top_signal as string),
       detectedAt: row.narrative_detected_at as string,
     },
     closestToken: row.token_address

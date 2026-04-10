@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const db = getDb();
   const row = db
     .prepare(
-      `SELECT g.*, n.theme, n.keywords, n.top_tweet
+      `SELECT g.*, n.theme, n.keywords, n.sources, n.top_signal
        FROM gaps g
        JOIN narratives n ON g.narrative_id = n.id
        WHERE g.id = ?`
@@ -45,7 +45,8 @@ export async function POST(request: Request) {
 
   const theme = row.theme as string;
   const keywords = JSON.parse(row.keywords as string) as string[];
-  const topTweet = JSON.parse(row.top_tweet as string);
+  const topSignal = JSON.parse(row.top_signal as string);
+  const sources = JSON.parse((row.sources as string) || "[]");
 
   const openai = new OpenAI({ apiKey: openaiKey });
 
@@ -83,7 +84,8 @@ Generate exactly 3 DISTINCT concept options for a meme coin. Each concept should
           role: "user",
           content: `Trending narrative: "${theme}"
 Keywords: ${keywords.join(", ")}
-Top tweet: "${topTweet.text || topTweet}"
+Sources: ${sources.join(", ")}
+Top signal: "${topSignal.title || topSignal}"
 
 No token exists on Four.meme for this narrative. Generate 3 distinct concepts.`,
         },

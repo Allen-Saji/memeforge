@@ -1,28 +1,29 @@
-export interface Tweet {
+export type SignalSource =
+  | "reddit"
+  | "google_trends"
+  | "dexscreener"
+  | "coingecko"
+  | "twitter";
+
+export interface TrendSignal {
   id: string;
-  text: string;
-  createdAt: string;
-  likeCount: number;
-  retweetCount: number;
-  replyCount: number;
-  viewCount: number;
-  hashtags: string[];
-  author: {
-    userName: string;
-    name: string;
-    followers: number;
-    isVerified: boolean;
-  };
+  source: SignalSource;
+  title: string; // post title, trend query, token name, tweet text
+  url?: string;
+  engagement: number; // normalized score: upvotes, search volume, market cap, likes
+  detectedAt: string;
+  metadata: Record<string, unknown>; // source-specific data
 }
 
 export interface NarrativeCluster {
   id: string;
   theme: string;
   keywords: string[];
-  tweets: Tweet[];
-  tweetCount: number;
+  signals: TrendSignal[];
+  signalCount: number;
+  sources: SignalSource[]; // which sources contributed
   avgEngagement: number;
-  topTweet: Tweet;
+  topSignal: TrendSignal;
   detectedAt: string;
 }
 
@@ -68,7 +69,47 @@ export interface ConceptOption {
   vibe: string;
 }
 
+// ── Launch on Four.meme types ────────────────────────────
+
+export type TokenLabel =
+  | "Meme" | "AI" | "Defi" | "Games" | "Infra"
+  | "De-Sci" | "Social" | "Depin" | "Charity" | "Others";
+
+export interface TokenTaxInfo {
+  feeRate: 1 | 3 | 5 | 10;
+  burnRate: number;      // % of fee burned
+  divideRate: number;    // % distributed as dividends
+  liquidityRate: number; // % added to LP
+  recipientRate: number; // % sent to recipientAddress
+  recipientAddress: string;
+  minSharing: number;    // min tokens for dividend eligibility
+}
+
+export interface LaunchConfig {
+  label: TokenLabel;
+  preSale: string;           // BNB amount (e.g. "0.1")
+  feePlan: boolean;          // anti-snipe mode
+  taxEnabled: boolean;
+  tokenTaxInfo?: TokenTaxInfo;
+  webUrl: string;
+  twitterUrl: string;
+  telegramUrl: string;
+}
+
+export interface LaunchPrepareResult {
+  createArg: string;   // hex bytes from Four.meme API
+  signature: string;   // hex bytes from Four.meme API
+  creationFee: string; // wei amount for msg.value
+}
+
+export interface LaunchResult {
+  tokenAddress: string;
+  txHash: string;
+  explorerUrl: string;
+  fourMemeUrl: string;
+}
+
 export interface PipelineEvent {
   type: "gap_detected" | "package_generating" | "package_complete" | "scan_cycle";
-  data: NarrativeGap | LaunchPackage | { timestamp: string };
+  data: NarrativeGap | LaunchPackage | { timestamp: string; sourcesSummary?: Record<SignalSource, number> };
 }

@@ -173,9 +173,9 @@ export function GapCard({ gap, pkg, selected, onSelect, index }: GapCardProps) {
             className="tabular-nums"
             style={{ fontFamily: "var(--font-geist-mono)" }}
           >
-            {gap.narrative.tweetCount}
+            {gap.narrative.signalCount}
           </span>{" "}
-          tweets
+          signals
         </span>
         <span className="flex items-center gap-1">
           <TrendingUp className="w-3 h-3" />

@@ -69,9 +69,9 @@ async function generateTextPackage(
 ): Promise<TextPackage> {
   const openai = new OpenAI({ apiKey });
 
-  const sampleTweets = gap.narrative.tweets
+  const sampleSignals = gap.narrative.signals
     .slice(0, 5)
-    .map((t) => `- "${t.text}" (${t.likeCount} likes, @${t.author.userName})`)
+    .map((s) => `- [${s.source}] "${s.title}" (${s.engagement.toLocaleString()} engagement)`)
     .join("\n");
 
   const response = await openai.chat.completions.create({
@@ -96,8 +96,9 @@ Generate creative, culturally-accurate Four.meme token packages. Output valid JS
         role: "user",
         content: `Trending narrative: "${gap.narrative.theme}"
 Keywords: ${gap.narrative.keywords.join(", ")}
-Sample tweets:
-${sampleTweets}
+Sources: ${gap.narrative.sources.join(", ")}
+Sample signals:
+${sampleSignals}
 
 No token exists on Four.meme for this narrative yet. Generate a launch package.`,
       },
