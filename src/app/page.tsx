@@ -23,6 +23,8 @@ export default function DashboardPage() {
     selectedGap,
     selectedPackage,
     addPackage,
+    scanNow,
+    scanning,
   } = usePipeline();
 
   const handlePackageGenerated = useCallback(
@@ -61,7 +63,13 @@ export default function DashboardPage() {
       <Header connected={connected} reconnecting={reconnecting} />
 
       {/* Stats bar */}
-      <StatsBar gaps={gaps} packages={packages} lastScanAt={lastScanAt} />
+      <StatsBar
+        gaps={gaps}
+        packages={packages}
+        lastScanAt={lastScanAt}
+        scanNow={scanNow}
+        scanning={scanning}
+      />
 
       {/* Main content: gap feed + detail panel */}
       <div className="flex flex-1 min-h-0 relative z-[1]">

@@ -15,6 +15,8 @@ interface PipelineState {
   selectedGap: NarrativeGap | null;
   selectedPackage: LaunchPackage | null;
   addPackage: (pkg: LaunchPackage) => void;
+  scanNow: () => Promise<void>;
+  scanning: boolean;
 }
 
 // Auto-detect: use mock data unless SSE endpoint is reachable
@@ -27,6 +29,7 @@ export function usePipeline(): PipelineState {
   const [reconnecting, setReconnecting] = useState(false);
   const [lastScanAt, setLastScanAt] = useState<string | null>(null);
   const [selectedGapId, setSelectedGapId] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
   const retryRef = useRef(0);
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -145,6 +148,29 @@ export function usePipeline(): PipelineState {
     setSelectedGapId(id);
   }, []);
 
+  const scanNow = useCallback(async () => {
+    setScanning(true);
+    try {
+      const res = await fetch("/api/scan", { method: "POST" });
+      const data = await res.json();
+      if (data.ok) {
+        setLastScanAt(new Date().toISOString());
+        // Refetch gaps from SSE init or reload
+        // For now, fetch fresh gaps from the SSE endpoint
+        const sseRes = await fetch("/api/sse");
+        // The SSE will push new gaps — for mock mode, refetch
+        if (USE_MOCK) {
+          // In live mode, SSE handles it. For manual scan, just reload gaps.
+          window.location.reload();
+        }
+      }
+    } catch (err) {
+      console.error("Manual scan failed:", err);
+    } finally {
+      setScanning(false);
+    }
+  }, []);
+
   const addPackage = useCallback((pkg: LaunchPackage) => {
     setPackages((prev) => {
       const exists = prev.find((p) => p.id === pkg.id);
@@ -174,5 +200,7 @@ export function usePipeline(): PipelineState {
     selectedGap,
     selectedPackage,
     addPackage,
+    scanNow,
+    scanning,
   };
 }

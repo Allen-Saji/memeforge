@@ -7,13 +7,14 @@ export async function register() {
     // Seed static Four.meme tokens into DB
     seedDatabase();
 
-    // Start pipeline if API keys are configured
+    // Start auto-pipeline only in production with keys set
     const hasKeys =
       process.env.TWITTER_API_KEY && process.env.OPENAI_API_KEY;
+    const manualScan = process.env.MANUAL_SCAN === "true";
 
-    if (hasKeys) {
+    if (hasKeys && !manualScan) {
       const interval = parseInt(
-        process.env.PIPELINE_INTERVAL || "60000",
+        process.env.PIPELINE_INTERVAL || "300000",
         10
       );
       console.log(
@@ -22,7 +23,7 @@ export async function register() {
       startPipeline(interval);
     } else {
       console.log(
-        "[MemeForge] Skipping pipeline — TWITTER_API_KEY and/or OPENAI_API_KEY not set"
+        `[MemeForge] Manual scan mode — use the Scan button or POST /api/scan`
       );
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Target, Package, Clock, TrendingUp } from "lucide-react";
+import { Target, Package, Clock, TrendingUp, Radar, Loader2 } from "lucide-react";
 import { useRelativeTime } from "@/hooks/use-relative-time";
 import type { NarrativeGap, LaunchPackage } from "@/types";
 
@@ -8,6 +8,8 @@ interface StatsBarProps {
   gaps: NarrativeGap[];
   packages: LaunchPackage[];
   lastScanAt: string | null;
+  scanNow: () => Promise<void>;
+  scanning: boolean;
 }
 
 function StatCard({
@@ -44,7 +46,7 @@ function StatCard({
   );
 }
 
-export function StatsBar({ gaps, packages, lastScanAt }: StatsBarProps) {
+export function StatsBar({ gaps, packages, lastScanAt, scanNow, scanning }: StatsBarProps) {
   const lastScan = useRelativeTime(lastScanAt);
 
   const avgScore =
@@ -53,7 +55,7 @@ export function StatsBar({ gaps, packages, lastScanAt }: StatsBarProps) {
       : "0.00";
 
   return (
-    <div className="grid grid-cols-2 gap-3 px-6 py-4 md:grid-cols-4 border-b border-[var(--border)]">
+    <div className="grid grid-cols-2 gap-3 px-6 py-4 md:grid-cols-5 border-b border-[var(--border)]">
       <StatCard
         icon={Target}
         label="Gaps Detected"
@@ -78,6 +80,19 @@ export function StatsBar({ gaps, packages, lastScanAt }: StatsBarProps) {
         value={lastScan}
         color="var(--text-secondary)"
       />
+      <button
+        onClick={scanNow}
+        disabled={scanning}
+        className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[var(--accent-dim)] bg-[var(--accent-muted)] text-[var(--accent)] font-bold text-sm cursor-pointer hover:brightness-110 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        style={{ fontFamily: "var(--font-orbitron)" }}
+      >
+        {scanning ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Radar className="w-4 h-4" />
+        )}
+        {scanning ? "Scanning..." : "Scan Now"}
+      </button>
     </div>
   );
 }
