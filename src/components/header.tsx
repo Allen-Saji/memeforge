@@ -31,7 +31,11 @@ export function Header({ connected, reconnecting }: HeaderProps) {
         </div>
       </div>
 
-      {/* Connection Status */}
+      {/* Wallet + Connection Status */}
+      <div className="flex items-center gap-3">
+        {/* Reown AppKit wallet button (web component) */}
+        <div dangerouslySetInnerHTML={{ __html: '<appkit-button size="sm"></appkit-button>' }} />
+      </div>
       <div className="flex items-center gap-2">
         {connected ? (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--green-glow)] border border-[var(--green-dim)]">

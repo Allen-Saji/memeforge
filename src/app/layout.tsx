@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Orbitron, Exo_2, Geist_Mono } from "next/font/google";
+import { Web3Provider } from "@/lib/web3/provider";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -39,7 +40,9 @@ export default function RootLayout({
       lang="en"
       className={`${orbitron.variable} ${exo2.variable} ${geistMono.variable} h-full dark`}
     >
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        <Web3Provider>{children}</Web3Provider>
+      </body>
     </html>
   );
 }
